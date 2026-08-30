@@ -1,0 +1,34 @@
+<idea-plugin>
+    <id>com.moling.SilkyUISupport</id>
+    <name>SilkyUISupport</name>
+    <version>1.0.0</version>
+    <vendor url="https://github.com/487666123/SilkyUISupport">末泠</vendor>
+    <icon>pluginIcon.svg</icon>
+
+    <description><![CDATA[
+        Provides intelligent completion for SilkyUI .sui.xml files and supports quickly creating XML starter templates from C# classes.<br>
+        <br>为 SilkyUI 提供 .sui.xml 智能补全，并支持从 C# 类快速创建 XML 初始模板。<br>
+        感谢太阳照常升起的 VS 插件：<a href="https://github.com/487666123/SilkyUISupport">https://github.com/487666123/SilkyUISupport</a>
+        ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.xml</depends>
+    <depends>com.intellij.modules.rider</depends>
+
+    <actions>
+        <action id="SilkyUI.CreateXmlTemplate"
+                class="com.moling.silky.CreateSilkyUiXmlTemplateAction"
+                text="创建 SilkyUI XML 初始模板"
+                description="创建当前 C# 类对应的 .sui.xml 初始模板">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+        </action>
+    </actions>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <completion.contributor language="XML" implementationClass="com.moling.silky.SilkyUiCompletionContributor"/>
+        <annotator language="XML" implementationClass="com.moling.silky.SilkyUiAnnotator"/>
+        <lang.documentationProvider implementationClass="com.moling.silky.SilkyUiDocumentationProvider"/>
+        <gotoDeclarationHandler implementationClass="com.moling.silky.SilkyUiGotoDeclarationHandler"/>
+    </extensions>
+</idea-plugin>
