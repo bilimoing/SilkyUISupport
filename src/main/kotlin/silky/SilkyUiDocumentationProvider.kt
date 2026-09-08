@@ -19,7 +19,7 @@ class SilkyUiDocumentationProvider : AbstractDocumentationProvider() {
     private fun buildElementDoc(cls: XmlMappingClass): String = buildString {
         append("<b>class ${escape(cls.alias)}</b><br/>")
         append(escape(cls.fullName)).append("<br/>")
-        append("属性: ${cls.properties.size}<br/>")
+        append("属性数: ${cls.properties.size}<br/>")
         if (cls.properties.isNotEmpty()) append("可用属性: ${escape(cls.properties.take(8).joinToString { it.name })}${if (cls.properties.size > 8) ", ..." else ""}")
     }
 
@@ -33,8 +33,11 @@ class SilkyUiDocumentationProvider : AbstractDocumentationProvider() {
     private fun buildBodyClassDoc(cls: SilkyUiElementGroupClass): String = buildString {
         append("<b>class ${escape(cls.name)}</b><br/>")
         append(escape(cls.fullName)).append("<br/>")
-        append("Body Class / UIElementGroup")
+        append("sui:Class / UIElementGroup")
     }
 
-    private fun escape(value: String): String = value.replace("&", "&").replace("<", "<").replace(">", ">")
+    private fun escape(value: String): String = value
+        .replace("&", "&")
+        .replace("<", "<")
+        .replace(">", ">")
 }

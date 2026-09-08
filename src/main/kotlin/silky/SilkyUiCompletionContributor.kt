@@ -27,7 +27,8 @@ class SilkyUiCompletionContributor : CompletionContributor() {
                     }
                     XmlContextType.AttributeName -> {
                         if (xmlContext.currentTag == "Body") {
-                            result.addElement(LookupElementBuilder.create("Class").withTypeText("指定 UIElementGroup 子类全名", true))
+                            result.addElement(LookupElementBuilder.create("sui:Class").withTypeText("指定 UIElementGroup 子类全名", true))
+                            result.addElement(LookupElementBuilder.create("Class").withTypeText("旧版兼容写法", true))
                             resolveBodyClassForOffset(text, parameters.offset, metadata)?.properties?.forEach { prop ->
                                 result.addElement(LookupElementBuilder.create(prop.name).withTypeText(prop.typeName, true))
                             }
@@ -38,7 +39,7 @@ class SilkyUiCompletionContributor : CompletionContributor() {
                         }
                     }
                     XmlContextType.AttributeValue -> {
-                        if (xmlContext.currentTag == "Body" && xmlContext.currentAttribute == "Class") {
+                        if (xmlContext.currentTag == "Body" && SilkyUiXmlUtil.isBodyClassAttribute(xmlContext.currentAttribute)) {
                             metadata.getAllGroupClasses().forEach { cls ->
                                 result.addElement(LookupElementBuilder.create(cls.fullName).withLookupString(cls.name).withTypeText(cls.fullName, true))
                             }

@@ -63,7 +63,7 @@ class SilkyUiAnnotator : Annotator {
             while (i < end && text[i].isWhitespace()) i++
             if (i >= end) break
             val nameStart = i
-            while (i < end && (text[i].isLetterOrDigit() || text[i] == '.' || text[i] == '_' || text[i] == '-')) i++
+            while (i < end && (text[i].isLetterOrDigit() || text[i] == '.' || text[i] == '_' || text[i] == '-' || text[i] == ':')) i++
             if (nameStart == i) {
                 i++
                 continue
@@ -86,7 +86,7 @@ class SilkyUiAnnotator : Annotator {
                 }
             }
 
-            if (tagName == "Body" && attrName == "Class" && value.isNotEmpty()) {
+            if (tagName == "Body" && SilkyUiXmlUtil.isBodyClassAttribute(attrName) && value.isNotEmpty()) {
                 if (metadata.getAllGroupClasses().none { it.fullName == value || it.name == value }) {
                     error(holder, valueStart, valueEnd, "未知类 '$value'")
                 }

@@ -53,7 +53,7 @@ class CreateSilkyUiXmlTemplateAction : AnAction("创建 SilkyUI XML 初始模板
 
     private fun buildXmlContent(fullClassName: String): String =
         "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\r\n" +
-            "<!-- Class 填写对应类名 -->\r\n" +
-            "<Body Class=\"$fullClassName\">\r\n" +
+            "<!-- sui:Class 填写对应 UIElementGroup 类 -->\r\n" +
+            "<Body xmlns:sui=\"https://github.com/487666123/SilkyUIFramework\" sui:Class=\"$fullClassName\">\r\n" +
             "</Body>\r\n"
 }

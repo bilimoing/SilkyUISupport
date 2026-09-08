@@ -10,6 +10,10 @@ object SilkyUiXmlUtil {
 
     fun isXmlNameChar(c: Char): Boolean = c.isLetterOrDigit() || c in xmlNameChars
 
+    private const val BodyClassNamespacePrefix = "sui:"
+    private const val BodyClassAttribute = "sui:Class"
+    private const val LegacyBodyClassAttribute = "Class"
+
     fun analyze(text: String, offset: Int): XmlContext {
         if (offset <= 0 || offset > text.length) return XmlContext()
 
@@ -34,18 +38,13 @@ object SilkyUiXmlUtil {
         val quoteCount = tagContent.count { it == '"' }
         if (quoteCount % 2 == 1) {
             val currentTag = extractTagName(tagContent)
-            val eqPos = tagContent.lastIndexOf('=')
-            val attr = if (eqPos > 0) {
-                var attrStart = eqPos - 1
-                while (attrStart >= 0 && (tagContent[attrStart].isLetterOrDigit() || tagContent[attrStart] == '.' || tagContent[attrStart] == '_' || tagContent[attrStart] == '-')) attrStart--
-                tagContent.substring(attrStart + 1, eqPos).trim()
-            } else ""
+            val attr = extractAttributeNameForValue(tagContent)
             return XmlContext(XmlContextType.AttributeValue, currentTag, attr)
         }
 
         if (tagContent.contains(' ')) {
             val afterSpace = tagContent.substringAfterLast(' ')
-            if (afterSpace.isNotEmpty() && (!afterSpace.contains('=') || afterSpace.all { it.isLetterOrDigit() || it == '.' || it == '_' || it == '-' })) {
+            if (afterSpace.isNotEmpty() && (!afterSpace.contains('=') || afterSpace.all { it.isLetterOrDigit() || it == '.' || it == '_' || it == '-' || it == ':' })) {
                 return XmlContext(XmlContextType.AttributeName, extractTagName(tagContent), afterSpace.trim())
             }
         }
@@ -79,7 +78,7 @@ object SilkyUiXmlUtil {
             val currentTag = getTagName(text, tagStart)
             if (currentTag.isBlank()) return null
             val prop = if (currentTag == "Body") {
-                resolveBodyClass(text, tagStart, findTagEnd(text, tagStart + 1) ?: text.length, metadata)?.properties?.firstOrNull { it.name == name }
+                resolveBodyClass(text, tagStart, findTagEnd(text, tagStart + 1) ?: text.length, metadata)?.properties?.firstOrNull { it.name == name || "$BodyClassNamespacePrefix${it.name}" == name }
             } else {
                 metadata.getPropertyByName(currentTag, name)
             }
@@ -89,7 +88,7 @@ object SilkyUiXmlUtil {
         }
 
         val context = analyze(text, offset + 1)
-        if (context.type == XmlContextType.AttributeValue && context.currentTag == "Body" && context.currentAttribute == "Class") {
+        if (context.type == XmlContextType.AttributeValue && context.currentTag == "Body" && isBodyClassAttribute(context.currentAttribute)) {
             val bodyClass = metadata.getAllGroupClasses().firstOrNull { it.fullName == name || it.name == name }
             if (bodyClass != null) return SilkyUiSymbolResolution(SilkyUiSymbolKind.BodyClass, range, name, "Body", bodyClass = bodyClass)
         }
@@ -101,9 +100,8 @@ object SilkyUiXmlUtil {
         val end = tagEnd.coerceAtMost(text.length)
         if (tagStart < 0 || tagStart >= end) return null
         val section = text.substring(tagStart, end)
-        val classIndex = section.indexOf("Class=", ignoreCase = true)
-        if (classIndex < 0) return null
-        var valueStart = classIndex + "Class=".length
+        val classIndex = findBodyClassAttributeIndex(section) ?: return null
+        var valueStart = classIndex + currentBodyClassAttributeName(section, classIndex).length
         if (valueStart >= section.length || section[valueStart] != '"' && section[valueStart] != '\'') return null
         val quote = section[valueStart++]
         val valueEnd = section.indexOf(quote, valueStart)
@@ -133,7 +131,29 @@ object SilkyUiXmlUtil {
 
     fun isSpecialElement(name: String): Boolean = name == "Style" || name.startsWith("M.") || name.startsWith("Style.")
 
-    fun isSpecialAttribute(name: String): Boolean = name == "Name" || name == "Class" || name == "Style" || name.startsWith("Bind.")
+    fun isSpecialAttribute(name: String): Boolean = isBodyClassAttribute(name) || name == "Name" || name == "Style" || name.startsWith("Bind.")
+
+    fun isBodyClassAttribute(name: String): Boolean = name == BodyClassAttribute || name == LegacyBodyClassAttribute
+
+    private fun extractAttributeNameForValue(tagContent: String): String {
+        val eqPos = tagContent.lastIndexOf('=')
+        if (eqPos <= 0) return ""
+        var attrStart = eqPos - 1
+        while (attrStart >= 0 && (tagContent[attrStart].isLetterOrDigit() || tagContent[attrStart] == '.' || tagContent[attrStart] == '_' || tagContent[attrStart] == '-' || tagContent[attrStart] == ':')) attrStart--
+        return tagContent.substring(attrStart + 1, eqPos).trim()
+    }
+
+    private fun findBodyClassAttributeIndex(section: String): Int? {
+        val namespacedIndex = section.indexOf("sui:Class=", ignoreCase = true)
+        if (namespacedIndex >= 0) return namespacedIndex
+
+        val legacyIndex = section.indexOf("Class=", ignoreCase = true)
+        return legacyIndex.takeIf { it >= 0 }
+    }
+
+    private fun currentBodyClassAttributeName(section: String, classIndex: Int): String {
+        return if (section.regionMatches(classIndex, "sui:Class", 0, "sui:Class".length, ignoreCase = true)) "sui:Class" else "Class"
+    }
 
     private fun extractTagName(tagContent: String): String {
         var end = tagContent.indexOfAny(charArrayOf(' ', '/', '>'))
