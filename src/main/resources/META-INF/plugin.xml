@@ -1,9 +1,9 @@
 <idea-plugin>
     <id>com.moling.SilkyUISupport</id>
     <name>SilkyUISupport</name>
-    <version>1.3.8</version>
+    <version>1.3.8.1</version>
     <vendor url="https://github.com/487666123/SilkyUISupport">末泠</vendor>
-    <icon>icon.png</icon>
+    <icon>pluginIcon.svg</icon>
     <description><![CDATA[SilkyUI Support for Rider provides XML editing assistance for SilkyUI .sui.xml files using C# symbols from the current solution.
         SilkyUI Support 是面向 JetBrains Rider 的插件，为 SilkyUI 的 .sui.xml 文件提供基于当前解决方案 C# 符号的编辑辅助功能。
         <h2>SilkyUI Support</h2>
