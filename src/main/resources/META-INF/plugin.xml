@@ -1,35 +1,71 @@
 <idea-plugin>
     <id>com.moling.SilkyUISupport</id>
     <name>SilkyUISupport</name>
-    <version>1.3.0</version>
+    <version>1.3.8</version>
     <vendor url="https://github.com/487666123/SilkyUISupport">末泠</vendor>
-    <icon>pluginIcon.svg</icon>
-    <description><![CDATA[
-SilkyUI Support<br>
-<br>
-为 JetBrains Rider 提供 SilkyUI .sui.xml 文件的开发支持。<br>
-<br>
-功能：<br>
-‑ XML 元素、属性和枚举值智能补全<br>
-‑ 根据当前 C# 解决方案动态读取 SilkyUI 类型和属性<br>
-‑ 为 Body 的 sui:Class 属性补全 UIElementGroup 子类<br>
-‑ 鼠标悬停显示 C# 类型、属性和枚举值信息<br>
-‑ 从 XML 元素或属性跳转到对应的 C# 定义<br>
-‑ 检查未知元素、未知属性、重复属性和非法枚举值<br>
-‑ 检查无效的 Body 类名<br>
-‑ 在 C# 编辑器右键菜单中创建 .sui.xml 初始模板<br>
-‑ 自动生成与 C# 类同名的 XML 文件<br>
-<br>
-使用方法<br>
-1. 使用 Rider 打开包含 SilkyUI 类型的 C# 解决方案。<br>
-2. 打开或创建 .sui.xml 文件，使用 XML 智能补全。<br>
-3. 在 C# 类上右键，选择“创建 SilkyUI XML 初始模板”。<br>
-<br>
-要求<br>
-‑ Rider 2025.3 或更高版本<br>
-‑ 64 位 Rider<br>
-<br>
-感谢原 Visual Studio 版本插件：<a href="https://github.com/487666123/SilkyUISupport">https://github.com/487666123/SilkyUISupport</a>
+    <icon>icon.png</icon>
+    <description><![CDATA[SilkyUI Support for Rider provides XML editing assistance for SilkyUI .sui.xml files using C# symbols from the current solution.
+        SilkyUI Support 是面向 JetBrains Rider 的插件，为 SilkyUI 的 .sui.xml 文件提供基于当前解决方案 C# 符号的编辑辅助功能。
+        <h2>SilkyUI Support</h2>
+        <p>SilkyUI Support 是面向 JetBrains Rider 的插件，为 SilkyUI 的 <code>.sui.xml</code> 文件提供基于当前解决方案 C# 符号的编辑辅助功能。</p>
+
+        <h3>智能补全</h3>
+        <ul>
+            <li>补全 XML 标签：<code>Body</code>、已映射的 SilkyUI 元素和 <code>sui:Style</code>。</li>
+            <li>补全普通属性、<code>bind:*</code> 绑定属性、SilkyUI 特殊属性和枚举属性值。</li>
+            <li>支持使用 <code>sui:Target</code> 指定样式属性补全来源类，插入当前 C# 项目中的公开类全限定名。</li>
+            <li>从当前解决方案的 C# 项目中读取带有 <code>XmlElementMappingAttribute</code> 的公开类，以及继承自 <code>UIElementGroup</code> 的公开类。</li>
+            <li>为 <code>Body sui:Class</code> 补全可用的 <code>UIElementGroup</code> 类，并为元素补全对应的公开属性。</li>
+            <li>支持绑定到 SilkyUI、Binding 或 Properties 命名空间 URI 的任意 XML 前缀。</li>
+        </ul>
+
+        <h3>CLR 命名空间导入</h3>
+        <p>可以通过 <code>clr-namespace:</code> 直接使用未声明 <code>XmlElementMappingAttribute</code> 的 C# 类，同时保留原有无命名空间标签的别名映射。</p>
+        <ul>
+            <li>补全当前项目及可见引用中的 CLR 命名空间和可创建类型。</li>
+            <li>按 C# 的 <code>global::Namespace.Type</code> 解析类型，处理源码类型、引用类型和类型歧义。</li>
+            <li>候选类型必须是可访问、非抽象、非静态、非泛型的顶层类，并具有可访问的无参构造函数。</li>
+            <li>已解析的 CLR 元素复用属性、枚举值、悬停、分类和源码导航功能。</li>
+            <li>对声明格式错误、类型不可用、类型歧义或类型无法创建的情况显示错误标记。</li>
+        </ul>
+
+        <h3>成员元素 <code>prop:Xxx</code></h3>
+        <p><code>prop:Xxx</code> 用于展开父元素的对象属性，并在该对象上设置子属性。支持属性节点的补全、逐层嵌套、悬停、诊断、导航和颜色预览。</p>
+        <ul>
+            <li>按 Properties 命名空间 URI 识别属性节点，支持别名前缀、默认命名空间和嵌套覆盖。</li>
+            <li>只对 class 或 interface 类型的对象属性提供成员元素补全。</li>
+            <li>查找包含基类及继承接口的属性；直接赋值和绑定补全仍要求公开 setter。</li>
+            <li>只有目标类型继承自 <code>SilkyUIFramework.Elements.UIView</code> 时，成员元素才提供 <code>bind:*</code> 补全。</li>
+        </ul>
+
+        <h3>编辑器辅助</h3>
+        <ul>
+            <li>悬停显示已解析元素、属性、C# 类型、声明类型、属性类型和枚举值信息。</li>
+            <li>通过 Ctrl+左键从元素名、属性名、<code>Body</code> 标签和 <code>sui:Class</code> 类名跳转到对应的 C# 定义。</li>
+            <li>为已知和未知元素、普通属性、特殊属性及未知属性使用不同的编辑器分类颜色。</li>
+            <li>检查未知元素、未知属性、重复属性、非法枚举值、只读属性赋值和无效的 <code>Body sui:Class</code>。</li>
+        </ul>
+
+        <h3>XML 模板</h3>
+        <p>在 Rider 的 C# 编辑器中右键当前类，可以执行“创建 SilkyUI XML 初始模板”：在类所在目录创建同名的 <code>.sui.xml</code> 文件，文件已存在时直接打开，并写入当前类的 <code>sui:Class</code>。</p>
+
+        <h3>XML 基础用法</h3>
+        <p>UI 文件必须使用 <code>.sui.xml</code> 后缀。根元素通常声明 SilkyUI、Binding 和 Properties 命名空间，<code>sui:Class</code> 用于指定继承自 <code>UIElementGroup</code> 的 C# 类，<code>sui:Name</code> 用于生成对应的 C# 元素属性，<code>bind:Text="Title"</code> 表示将数据源的 <code>Title</code> 绑定到元素的 <code>Text</code> 属性。</p>
+
+        <h3>当前边界</h3>
+        <ul>
+            <li>支持 XML 元素逐层嵌套，不支持在单个标签中使用点分成员路径。</li>
+            <li>成员展开仅支持 class 或 interface 对象属性，不支持结构体属性的逐层修改与写回。</li>
+            <li><code>prop:Xxx</code> 用于设置对象的子属性，不支持通过元素文本为标量属性赋值。</li>
+            <li>定义导航要求对应符号及其源码位置可被解析；<code>Body</code> 类导航要求 <code>sui:Class</code> 完整且匹配已发现的 <code>UIElementGroup</code> 派生类。</li>
+        </ul>
+
+        <h3>使用要求</h3>
+        <ul>
+            <li>JetBrains Rider 2025.3 或更高版本。</li>
+            <li>64 位 Rider。</li>
+            <li>使用 Rider 打开包含 SilkyUI 类型的 C# 解决方案。</li>
+        </ul>
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>

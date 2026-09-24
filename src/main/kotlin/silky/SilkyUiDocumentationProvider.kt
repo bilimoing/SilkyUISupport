@@ -13,6 +13,9 @@ class SilkyUiDocumentationProvider : AbstractDocumentationProvider() {
             SilkyUiSymbolKind.Element -> buildElementDoc(resolution.mappingClass ?: return null)
             SilkyUiSymbolKind.Attribute -> buildAttributeDoc(resolution.currentTag, resolution.property ?: return null)
             SilkyUiSymbolKind.BodyClass -> buildBodyClassDoc(resolution.bodyClass ?: return null)
+            SilkyUiSymbolKind.Namespace -> "<b>XML namespace</b><br/>${escape(resolution.symbolName)}"
+            SilkyUiSymbolKind.Style -> resolution.style?.let { "<b>Style ${escape(it.name)}</b><br/>Target: ${escape(it.targetTypeName ?: "any")}" }
+            SilkyUiSymbolKind.PropertyObject -> resolution.property?.let { buildAttributeDoc(resolution.currentTag, it) }
         }
     }
 

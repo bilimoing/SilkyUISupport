@@ -37,8 +37,9 @@ class SilkyUiAnnotator : Annotator {
             val tagName = text.substring(tagNameStart, tagNameEnd)
             val mappedClass = if (tagName == "Body") null else metadata.getClassByName(tagName)
             val bodyClass = if (tagName == "Body") SilkyUiXmlUtil.resolveBodyClass(text, tagStart, tagEnd, metadata) else null
+            val clrType = metadata.getTypeByName(tagName.substringAfter(':', tagName))
 
-            if (tagName != "Body" && !SilkyUiXmlUtil.isSpecialElement(tagName) && mappedClass == null) {
+            if (tagName != "Body" && !SilkyUiXmlUtil.isSpecialElement(tagName) && mappedClass == null && clrType == null) {
                 error(holder, tagNameStart, tagNameEnd, "未知元素 '$tagName'")
             }
 
@@ -94,12 +95,14 @@ class SilkyUiAnnotator : Annotator {
             }
 
             if (SilkyUiXmlUtil.isSpecialAttribute(attrName)) continue
+            if (attrName.startsWith("bind:") || attrName.startsWith("prop:")) continue
             if (!seen.add(attrName)) {
                 error(holder, nameStart, nameStart + attrName.length, "重复属性 '$attrName'")
                 continue
             }
 
-            val prop = if (tagName == "Body") bodyClass?.properties?.firstOrNull { it.name == attrName } else metadata.getPropertyByName(tagName, attrName)
+            val propertyName = attrName.substringAfter(':').substringAfterLast('.')
+            val prop = if (tagName == "Body") bodyClass?.properties?.firstOrNull { it.name == propertyName } else metadata.getPropertyByName(tagName, propertyName)
             if ((tagName == "Body" && bodyClass != null || mappedClass != null) && prop == null) {
                 error(holder, nameStart, nameStart + attrName.length, "'$tagName' 上没有 '$attrName' 属性")
             }
